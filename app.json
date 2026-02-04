@@ -2,7 +2,7 @@
   "expo": {
     "name": "MusicManager",
     "slug": "MusicManager",
-    "version": "v1.0.0-beta1",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "musicmanagerios",
