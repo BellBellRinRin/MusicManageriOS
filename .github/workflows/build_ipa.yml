@@ -25,7 +25,7 @@ jobs:
         run: npm install
 
       - name: Prebuild (Convert to Native Project)
-        run: npx expo prebuild --platform ios --no-install
+        run: npx expo prebuild --platform ios
 
       - name: Build Unsigned IPA with Xcode
         run: |
