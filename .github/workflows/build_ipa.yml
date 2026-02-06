@@ -1,0 +1,56 @@
+name: Build iOS IPA for Sideloadly
+on:
+  workflow_dispatch: # 手動実行ボタンを有効化
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prebuild (Convert to Native Project)
+        run: npx expo prebuild --platform ios --no-install
+
+      - name: Build Unsigned IPA with Xcode
+        run: |
+          # ワークスペース名を取得
+          PROJECT_NAME=$(ls ios | grep .xcworkspace | sed 's/\.xcworkspace//')
+          echo "Found project: $PROJECT_NAME"
+
+          # 実機用(iphoneos)としてアーカイブ作成（署名なし）
+          xcodebuild -workspace "./ios/$PROJECT_NAME.xcworkspace" \
+            -scheme "$PROJECT_NAME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "./build/$PROJECT_NAME.xcarchive" \
+            archive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
+
+          # Payloadフォルダを作ってIPA化
+          mkdir Payload
+          cp -r "./build/$PROJECT_NAME.xcarchive/Products/Applications/$PROJECT_NAME.app" ./Payload/
+          zip -r MusicManager.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: MusicManager-IPA
+          path: MusicManager.ipa

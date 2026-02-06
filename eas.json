@@ -2,7 +2,8 @@
   "build": {
     "preview": {
       "ios": {
-        "simulator": false
+        "simulator": true,
+        "distribution": "internal"
       }
     }
   }
